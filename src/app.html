@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Converter</title>
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>
+
+<style>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  :root {
+    --text-white: #fff;
+
+    --primary-bg: #f5f5f5;
+    --secondary-bg: #dbdbdb;
+
+    --file-upload-bg: #f4f4f4;
+    --file-upload-border: #e0e0e0;
+
+    --primary-text: #333;
+    --secondary-text: #666;
+    --tertiary-text: #999;
+
+    --accent-color: #613583;
+    --error-color: #ff0033;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primary-bg: #222;
+      --secondary-bg: #333;
+
+      --file-upload-bg: #333;
+      --file-upload-border: #444;
+
+      --primary-text: #fff;
+      --secondary-text: #ccc;
+      --tertiary-text: #999;
+
+      --accent-color: #7400e0;
+    }
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+  body {
+    font-family: sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+  }
+  ul,
+  ol,
+  dl {
+    list-style: none;
+  }
+  button {
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+  }
+  input,
+  button {
+    font: inherit;
+  }
+  img {
+    display: block;
+    max-width: 100%;
+  }
+</style>
