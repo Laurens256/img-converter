@@ -1,13 +1,40 @@
 <script lang="ts">
-  import { uploadedFiles } from '$lib';
+  import { uploadedFiles } from '$lib/stores';
   import { handleDownload } from '$lib/utils';
   import { FileUpload, FileListItem, OutputSelect, SettingsModal } from '$lib/components';
   import { IconTrashX } from '@tabler/icons-svelte';
 
   let settingsModalFileIndex: number | null = null;
 
+  let downloadButtonState = {
+    text: 'Download all',
+    disabled: false
+  };
+
   const setSettingsModalFileIndex = (index: number | null) => {
     settingsModalFileIndex = index;
+  };
+
+  const handleDownloadAll = async () => {
+    try {
+      await handleDownload($uploadedFiles, (count) => {
+        downloadButtonState = {
+          text: `Converting (${count} / ${$uploadedFiles.length})`,
+          disabled: true
+        };
+      });
+
+      downloadButtonState = {
+        text: `Downloaded (${$uploadedFiles.length})`,
+        disabled: false
+      };
+    } catch (error) {
+      console.log(error);
+      downloadButtonState = {
+        text: 'Download failed',
+        disabled: false
+      };
+    }
   };
 
   $: commonOutput = (() => {
@@ -41,9 +68,13 @@
 
       <div class="actionsSection">
         <OutputSelect itemIndex={-1} selectedOutput={commonOutput} />
-        <button on:click={() => handleDownload($uploadedFiles)} class="downloadButton"
-          >Download all</button
+        <button
+          on:click={handleDownloadAll}
+          class="downloadButton"
+          disabled={downloadButtonState.disabled}
         >
+          {downloadButtonState.text}
+        </button>
       </div>
     </div>
 
@@ -86,6 +117,11 @@
     border-radius: 0.5rem;
     padding-inline: 1rem;
     text-align: center;
+
+    &.inputFocused {
+      outline: dashed 3px var(--accent-color);
+      outline-offset: 3px;
+    }
 
     &::after {
       content: 'Drop to upload';
@@ -152,12 +188,15 @@
   }
   .downloadButton {
     background-color: var(--accent-color);
+    color: var(--text-white);
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
+    min-width: 10rem;
   }
 
   .fileList {
     max-height: 35rem;
     overflow-y: auto;
+		padding-bottom: 5rem; /* TODO: variable for popover height */
   }
 </style>

@@ -1,4 +1,4 @@
-import { imageTypes, type UploadedFile } from '$lib';
+import { type UploadedFile, supportedImageOutputTypes } from '$lib/types';
 
 const convertImages = async function* (inputArr: UploadedFile[]) {
   for (const input of inputArr) {
@@ -30,8 +30,9 @@ const convertImages = async function* (inputArr: UploadedFile[]) {
     canvas.height = scaledHeight;
     ctx.drawImage(image, 0, 0, scaledWidth, scaledHeight);
 
+    const mimeType = supportedImageOutputTypes.find(type => type.extension === outputExt)?.mimeType;
     // TODO: quality here
-    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(blob => resolve(blob), imageTypes[outputExt].mimeType));
+    const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(blob => resolve(blob), mimeType, 1));
     URL.revokeObjectURL(image.src);
 
     if (!blob) {

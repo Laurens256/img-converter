@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { uploadedFiles } from '$lib';
+  import { uploadedFiles } from '$lib/stores';
 
   export let uploadedFileIndex: number | null;
   export let setModalFileIndex: (index: number | null) => void;

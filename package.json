@@ -14,6 +14,7 @@
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/streamsaver": "^2.0.4",
+		"@types/wicg-file-system-access": "^2023.10.4",
 		"svelte": "^4.2.7",
 		"svelte-check": "^3.6.0",
 		"tslib": "^2.4.1",
@@ -24,7 +25,6 @@
 	"dependencies": {
 		"@tabler/icons-svelte": "^2.47.0",
 		"fflate": "^0.8.2",
-		"jszip": "^3.10.1",
 		"streamsaver": "^2.0.6"
 	}
 }

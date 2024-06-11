@@ -1,3 +1,7 @@
+<script lang="ts">
+  import '$lib/polyfills';
+</script>
+
 <div class="container">
   <slot/>
 </div>

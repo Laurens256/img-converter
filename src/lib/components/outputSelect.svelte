@@ -1,56 +1,76 @@
 <script lang="ts">
-  import { uploadedFiles, imageTypes, type ImageExtension } from '$lib';
+	import { uploadedFiles } from '$lib/stores';
+	import {
+		supportedImageOutputTypes,
+		type SupportedImageOutputExtension
+	} from '$lib/types';
+	import { trapFocus } from '$lib/utils';
 
-  export let itemIndex: number;
-  export let selectedOutput: ImageExtension | null;
+	export let itemIndex: number;
+	export let selectedOutput: SupportedImageOutputExtension | null;
 
-  const imageExtensions: ImageExtension[] = Object.values(imageTypes).map(
-    (obj) => obj.extension
-  );
+	let outputMenuOpen = false;
 
-  const handleOutputChange = (output: string) => {
-    const newUploadedFiles = $uploadedFiles.map((file, index) => {
-      if (index === itemIndex || itemIndex === -1) {
-        return {
-          ...file,
-          output: output as ImageExtension
-        };
-      }
-      return file;
-    });
-    uploadedFiles.set(newUploadedFiles);
-  };
+	const imageExtensions = Object.values(supportedImageOutputTypes).map(
+		(obj) => obj.extension
+	);
+
+	const toggleMenu = () => {
+		outputMenuOpen = !outputMenuOpen;
+	};
+
+	const handleOutputChange = (output: string) => {
+		const newUploadedFiles = $uploadedFiles.map((file, index) => {
+			if (index === itemIndex || itemIndex === -1) {
+				return {
+					...file,
+					output: output as SupportedImageOutputExtension
+				};
+			}
+			return file;
+		});
+		uploadedFiles.set(newUploadedFiles);
+		toggleMenu();
+	};
 </script>
 
 <div class="container">
-  <label for="image_output">{itemIndex === -1 ? 'Convert all to:' : 'Output:'}</label>
-  <select
-    name="image_output"
-    id="image_output"
-    class="select"
-    on:change={(e) => handleOutputChange(e.currentTarget.value)}
-    value={selectedOutput}
-  >
-    {#each imageExtensions as extension}
-      <option value={extension}>
-        {extension}
-      </option>
-    {/each}
-  </select>
+	<button on:click={toggleMenu}>{itemIndex === -1 ? 'Convert all to:' : 'Output:'} {selectedOutput}</button>
+
+	<div
+		class="outputPopover"
+		class:active={outputMenuOpen}
+		use:trapFocus={{ isActive: outputMenuOpen, onClose: toggleMenu }}
+	>
+		{#each imageExtensions as extension}
+			<button on:click={() => handleOutputChange(extension)}>{extension}</button>
+		{/each}
+	</div>
 </div>
 
+
 <style>
-  .container {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .select {
-    appearance: none;
-    background-color: transparent;
-    border: solid 1px var(--accent-color);
-    border-radius: 0.5rem;
-    padding: 0.5rem 1rem;
-    min-width: 6rem;
-  }
+	.container {
+		position: relative;
+	}
+	/* .select {
+		appearance: none;
+		background-color: transparent;
+		border: solid 1px var(--accent-color);
+		border-radius: 0.5rem;
+		padding: 0.5rem 1rem;
+		min-width: 6rem;
+	} */
+
+	.outputPopover {
+		display: none;
+		background-color: red;
+		position: absolute;
+		/* top: 100%;
+		right: 0; */
+
+		&.active {
+			display: block;
+		}
+	}
 </style>

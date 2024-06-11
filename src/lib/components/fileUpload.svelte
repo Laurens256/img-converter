@@ -1,99 +1,132 @@
 <script lang="ts">
-  import { uploadedFiles, imageTypes, type UploadedFile } from '$lib';
-  import { IconFileUpload } from '@tabler/icons-svelte';
+	import {
+		supportedImageOutputTypes,
+		supportedImageInputTypes,
+		type UploadedFile
+	} from '$lib/types';
+	import { uploadedFiles } from '$lib/stores';
+	import { IconFileUpload } from '@tabler/icons-svelte';
 
-  export let iconSize = 0;
+	export let iconSize = 0;
 
-  let fileInput: HTMLInputElement;
-  let isDraggingOver = false;
-  let inputFocused = false;
+	// TODO: allow zip files
+	const validMimeTypes = supportedImageInputTypes.map(
+		(type) => type.mimeType
+	) as string[];
 
-  // TODO: validate file types
-  const handleInput = (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
-    const newFiles: UploadedFile[] = Array.from(e.currentTarget.files || []).map((file) => ({
-      file,
-      output: imageTypes.png.extension,
-      resolutionMultiplier: {
-        width: 1,
-        height: 1
-      }
-    }));
-    console.log(newFiles)
+	let fileInput: HTMLInputElement;
+	let isDraggingOver = false;
 
-    const mergedFiles = [...newFiles, ...$uploadedFiles];
+	const addUploadedFiles = (files: File[]) => {
+		const newFiles: UploadedFile[] = files.map((file) => {
+			return {
+				file,
+				output:
+					supportedImageInputTypes.find((type) => type.mimeType === 'image/png')
+						?.extension || supportedImageOutputTypes[0].extension,
+				resolutionMultiplier: {
+					width: 1,
+					height: 1
+				}
+			};
+		});
 
-    uploadedFiles.set(mergedFiles);
-  };
+		const mergedFiles = [...newFiles, ...$uploadedFiles];
 
-  const handleFileDrag = (e: DragEvent) => {
-    e.preventDefault();
-    isDraggingOver = e.type === 'dragover';
-  };
+		uploadedFiles.set(mergedFiles);
+	};
 
-  const handleFileDrop = (e: DragEvent) => {
-    e.preventDefault();
+	const handleInput = async (files: File[]) => {
+		const filesToUpload: File[] = [];
+		const filesToNotUpload: File[] = [];
+		for (const file of files || []) {
+			if (validMimeTypes.includes(file.type)) {
+				if (true) {
+					// TODO check if file if zip, if it is unzip and add check if files are valid recursively
+				}
+				filesToUpload.push(file);
+			} else {
+				filesToNotUpload.push(file);
+			}
+		}
 
-    if (e.dataTransfer) {
-      fileInput.files = e.dataTransfer.files;
-      fileInput.dispatchEvent(new Event('input'));
-    }
-  };
+		// TODO: error message
+		if (filesToNotUpload.length) {
+			console.log('These files are not supported: ', filesToNotUpload);
+		}
+
+		addUploadedFiles(filesToUpload);
+	};
+
+	const handleFileDrag = (e: DragEvent) => {
+		e.preventDefault();
+		isDraggingOver = e.type === 'dragover';
+	};
+
+	const handleFileDrop = (e: DragEvent) => {
+		e.preventDefault();
+
+		if (e.dataTransfer) {
+			fileInput.files = e.dataTransfer.files;
+			fileInput.dispatchEvent(new Event('input'));
+		}
+	};
 </script>
 
 <input
-  class="input"
-  on:input={handleInput}
-  on:focus={() => (inputFocused = true)}
-  on:blur={() => (inputFocused = false)}
-  bind:this={fileInput}
-  id="file_input"
-  name="file_input"
-  multiple
-  type="file"
-  accept="image/*, application/gzip, application/zip, application/x-7z-compressed, application/x-rar-compressed, application/x-tar, application/x-bzip2, application/x-7z-compressed, application/x-xz, application/x-lzip, application/x-lzma, application/x-lzop"
+	class="input"
+	on:input={(e) => handleInput(Array.from(e.currentTarget.files || []))}
+	bind:this={fileInput}
+	id="file_input"
+	name="file_input"
+	multiple
+	type="file"
+	accept={validMimeTypes.join(',')}
 />
 <label
-  for="file_input"
-  class={`
-  ${$$restProps.class}
-  ${isDraggingOver ? ' draggingOver' : ''}
-  ${inputFocused ? ' inputFocused' : ''}
-   label`}
-  on:dragover={handleFileDrag}
-  on:dragend={handleFileDrag}
-  on:dragleave={handleFileDrag}
-  on:drop={handleFileDrop}
+	for="file_input"
+	class={`${$$restProps.class}
+  ${isDraggingOver ? ' draggingOver' : ''} label`}
+	on:dragover={handleFileDrag}
+	on:dragend={handleFileDrag}
+	on:dragleave={handleFileDrag}
+	on:drop={handleFileDrop}
 >
-  {#if iconSize}
-    <IconFileUpload
-      class={`${$$restProps.iconClass} icon`}
-      stroke={1.5}
-      size={iconSize}
-    />
-  {/if}
-  <slot />
+	{#if iconSize}
+		<IconFileUpload
+			class={`${$$restProps.iconClass} icon`}
+			stroke={1.5}
+			size={iconSize}
+		/>
+	{/if}
+	<slot />
 </label>
 
 <style>
-  .label {
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    width: fit-content;
-    align-items: center;
-    justify-content: center;
-  }
-  .input {
-    position: absolute;
-    background-color: red;
-    position: absolute;
-    left: calc(-100vw - 1px);
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-  }
-  .icon {
-    width: 2rem;
-  }
+	.label {
+		cursor: pointer;
+		position: relative;
+		overflow: hidden;
+		display: flex;
+		width: fit-content;
+		align-items: center;
+		justify-content: center;
+	}
+	.input {
+		position: absolute;
+		background-color: red;
+		position: absolute;
+		left: calc(-100vw - 1px);
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+
+		&:focus-visible + .label {
+			outline: dashed 3px var(--accent-color);
+			outline-offset: 3px;
+		}
+	}
+	.icon {
+		width: 2rem;
+	}
 </style>
